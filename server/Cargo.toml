@@ -5,3 +5,4 @@ authors = ["york yao <yaoao12306@outlook.com>"]
 
 [dependencies]
 ws = "*"
+clap = "~2.19.0"
