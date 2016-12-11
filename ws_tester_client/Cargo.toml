@@ -1,0 +1,7 @@
+[package]
+name = "ws_tester_client"
+version = "0.1.0"
+authors = ["york yao <yaoao12306@outlook.com>"]
+
+[dependencies]
+ws = "*"
