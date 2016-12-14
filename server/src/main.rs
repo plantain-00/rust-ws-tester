@@ -4,6 +4,13 @@ use ws::listen;
 extern crate clap;
 use clap::{Arg, App};
 
+extern crate pretty_bytes;
+use pretty_bytes::converter::convert;
+
+extern crate timer;
+extern crate chrono;
+use std::sync::mpsc::channel;
+
 fn main() {
     let matches = App::new("ws tester server-side.")
                       .arg(Arg::with_name("port").takes_value(true).long("port"))
@@ -46,7 +53,7 @@ fn main() {
 
     println!("Listening {}:{}.", host, port);
     println!("Sending {} message * {} times per second.",
-             messageLength,
+             convert(messageLength as f64),
              messageCountPerSecond);
 
     let message = std::iter::repeat("a").take(messageLength).collect::<String>();
@@ -56,5 +63,27 @@ fn main() {
     let mut messageCount = 0;
     let mut messageTotalLength = 0;
 
-    listen((host, port), |ws| move |message| ws.send(message)).unwrap();
+    listen((host, port), |ws| {
+        let timer = timer::Timer::new();
+        let guard = timer.schedule_repeating(chrono::Duration::milliseconds(1000), move || {
+            move |message| {
+                for i in 0..messageCountPerSecond {
+                    let result = ws.send(message);
+                    match result {
+                        Ok(val) => {
+                            messageTotalLength += messageLength;
+                            messageCount += 1;
+                        }
+                        Err(e) => {
+                            errorCount += 1;
+                        }
+                    }
+                }
+            }
+        });
+        ws.on_close(|error| {
+            guard.drop();
+        });
+    })
+        .unwrap();
 }

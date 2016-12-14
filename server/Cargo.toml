@@ -6,3 +6,6 @@ authors = ["york yao <yaoao12306@outlook.com>"]
 [dependencies]
 ws = "*"
 clap = "~2.19.0"
+pretty-bytes = "0.1.0"
+timer = "0.1.6"
+chrono = "0.2.25"
